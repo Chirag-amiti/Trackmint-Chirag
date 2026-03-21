@@ -29,6 +29,7 @@ type GoalFormValues = z.infer<typeof goalSchema>;
 type ContributionFormValues = z.infer<typeof contributionSchema>;
 
 export function GoalsPage() {
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editing, setEditing] = useState<Goal | null>(null);
   const [activeGoal, setActiveGoal] = useState<Goal | null>(null);
   const [contributionMode, setContributionMode] = useState<"contribute" | "withdraw">("contribute");
@@ -87,6 +88,7 @@ export function GoalsPage() {
       queryClient.invalidateQueries({ queryKey: ["goals"] });
       queryClient.invalidateQueries({ queryKey: ["dashboard-summary"] });
       showToast(editing ? "Goal updated" : "Goal created");
+      setIsCreateOpen(false);
       setEditing(null);
     },
   });
@@ -111,8 +113,19 @@ export function GoalsPage() {
 
   return (
     <AppShell title="Savings Goals">
-      <div className="page-grid page-grid--two">
-        <Card title="Goal progress" subtitle="Track funding status, contributions, and withdrawals." className="page-section page-section--list">
+      <Card
+        title="Goal progress"
+        subtitle="Track funding status, contributions, and withdrawals."
+        className="page-section page-section--list"
+        actions={
+          <button type="button" className="primary-button" onClick={() => {
+            setEditing(null);
+            setIsCreateOpen(true);
+          }}>
+            Create goal
+          </button>
+        }
+      >
           <div className="list-stack">
             {goals.map((goal) => (
               <div key={goal.id} className="budget-item">
@@ -154,16 +167,14 @@ export function GoalsPage() {
                 </div>
               </div>
             ))}
-            {!goals.length && <div className="empty-state">No savings goals yet. Add one from the form on the right.</div>}
+            {!goals.length && <div className="empty-state">No savings goals yet. Use the button above to create one.</div>}
           </div>
-        </Card>
+      </Card>
 
-        <Card title="Create goal" subtitle="Track major savings targets and contributions." className="page-section page-section--form">
-          <GoalForm form={form} accounts={accounts} onSubmit={(values) => saveMutation.mutate(values)} isLoading={saveMutation.isPending} />
-        </Card>
-      </div>
-
-      <Modal open={Boolean(editing)} title={`Edit ${editing?.name ?? "goal"}`} onClose={() => setEditing(null)}>
+      <Modal open={isCreateOpen || Boolean(editing)} title={editing ? `Edit ${editing.name}` : "Create goal"} onClose={() => {
+        setIsCreateOpen(false);
+        setEditing(null);
+      }}>
         <GoalForm form={form} accounts={accounts} onSubmit={(values) => saveMutation.mutate(values)} isLoading={saveMutation.isPending} />
       </Modal>
 

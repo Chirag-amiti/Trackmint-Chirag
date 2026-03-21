@@ -28,6 +28,9 @@ export function DashboardPage() {
     { label: "Current Month Expense", value: data?.currentMonthExpense ?? 0, tone: "danger" },
     { label: "Net Balance", value: data?.netBalance ?? 0, tone: "primary" },
   ];
+  const categorySpend = data?.spendingByCategory ?? [];
+  const totalCategorySpend = categorySpend.reduce((sum, item) => sum + item.value, 0);
+  const topCategories = categorySpend.slice(0, 5);
 
   return (
     <AppShell title="Dashboard">
@@ -60,17 +63,40 @@ export function DashboardPage() {
 
         <Card title="Spending by Category" className="dashboard-card dashboard-card--chart">
           <div className="chart-box">
-            {(data?.spendingByCategory?.length ?? 0) > 0 ? (
-              <ResponsiveContainer width="100%" height={280}>
-                <PieChart>
-                  <Pie data={data?.spendingByCategory ?? []} dataKey="value" nameKey="label" innerRadius={70} outerRadius={100}>
-                    {(data?.spendingByCategory ?? []).map((item) => (
-                      <Cell key={item.label} fill={item.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={(value) => tooltipCurrency(value)} />
-                </PieChart>
-              </ResponsiveContainer>
+            {categorySpend.length > 0 ? (
+              <div className="donut-panel">
+                <div className="donut-panel__visual">
+                  <ResponsiveContainer width="100%" height={280}>
+                    <PieChart>
+                      <Pie data={categorySpend} dataKey="value" nameKey="label" innerRadius={78} outerRadius={108}>
+                        {categorySpend.map((item) => (
+                          <Cell key={item.label} fill={item.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip formatter={(value) => tooltipCurrency(value)} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                  <div className="donut-panel__center">
+                    <span>Total spend</span>
+                    <strong>{currency(totalCategorySpend)}</strong>
+                  </div>
+                </div>
+
+                <div className="donut-panel__legend">
+                  {topCategories.map((item) => (
+                    <div key={item.label} className="donut-legend-item">
+                      <div className="donut-legend-item__copy">
+                        <span className="category-chip__dot category-chip__dot--large" style={{ background: item.color }} />
+                        <div>
+                          <strong>{item.label}</strong>
+                          <small>{((item.value / totalCategorySpend) * 100 || 0).toFixed(0)}% of spend</small>
+                        </div>
+                      </div>
+                      <strong>{currency(item.value)}</strong>
+                    </div>
+                  ))}
+                </div>
+              </div>
             ) : (
               <div className="empty-state">No spending data for the current month yet.</div>
             )}
