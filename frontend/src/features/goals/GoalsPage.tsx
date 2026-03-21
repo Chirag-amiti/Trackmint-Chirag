@@ -130,10 +130,13 @@ export function GoalsPage() {
             {goals.map((goal) => (
               <div key={goal.id} className="budget-item">
                 <div className="budget-item__header">
-                  <div>
-                    <strong>{goal.name}</strong>
-                    <span>
-                      {goal.status} {"\u00B7"} {goal.currentAmount.toFixed(0)} / {goal.targetAmount.toFixed(0)}
+                  <div className="goal-item__copy">
+                    <div className="goal-item__title-row">
+                      <strong>{goal.name}</strong>
+                      <span className={`status-badge status-badge--${goal.status.toLowerCase()}`}>{goal.status}</span>
+                    </div>
+                    <span className="goal-item__amount">
+                      {goal.currentAmount.toFixed(0)} / {goal.targetAmount.toFixed(0)}
                     </span>
                   </div>
                   <div className="inline-actions">

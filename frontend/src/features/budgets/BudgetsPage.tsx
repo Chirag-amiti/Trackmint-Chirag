@@ -149,8 +149,8 @@ function BudgetForm({
     <form className="form-grid" onSubmit={form.handleSubmit(onSubmit)}>
       <label>
         Category
-        <select {...form.register("categoryId")} disabled={disabledCategory}>
-          <option value="">Select category</option>
+        <select {...form.register("categoryId")} disabled={disabledCategory || !categories.filter((category) => category.type === "Expense").length}>
+          <option value="">{categories.filter((category) => category.type === "Expense").length ? "Select category" : "Create an expense category first"}</option>
           {categories
             .filter((category) => category.type === "Expense")
             .map((category) => (
@@ -159,6 +159,7 @@ function BudgetForm({
               </option>
             ))}
         </select>
+        {!categories.filter((category) => category.type === "Expense").length && <small className="field-hint field-hint--warning">No expense category available. Create one in Settings first.</small>}
       </label>
       <label>
         Month

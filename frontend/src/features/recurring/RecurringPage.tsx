@@ -94,7 +94,9 @@ export function RecurringPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["recurring"] });
+      queryClient.invalidateQueries({ queryKey: ["transactions"] });
       queryClient.invalidateQueries({ queryKey: ["dashboard-summary"] });
+      queryClient.invalidateQueries({ queryKey: ["accounts"] });
       showToast(editing ? "Recurring item updated" : "Recurring item created");
       setIsCreateOpen(false);
       setEditing(null);
@@ -105,6 +107,9 @@ export function RecurringPage() {
     mutationFn: async (id: string) => api.delete(`/recurring/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["recurring"] });
+      queryClient.invalidateQueries({ queryKey: ["transactions"] });
+      queryClient.invalidateQueries({ queryKey: ["accounts"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard-summary"] });
       showToast("Recurring item deleted");
     },
   });
@@ -187,18 +192,20 @@ function RecurringForm({
       </label>
       <label>
         Source account
-        <select {...form.register("accountId")}>
+        <select {...form.register("accountId")} disabled={!accounts.length}>
+          {!accounts.length && <option value="">Create an account first</option>}
           {accounts.map((account) => (
             <option key={account.id} value={account.id}>
               {account.name}
             </option>
           ))}
         </select>
+        {!accounts.length && <small className="field-hint field-hint--warning">No source account yet. Create one in Accounts, then come back here.</small>}
       </label>
       {form.watch("type") === "Transfer" ? (
         <label>
           Destination account
-          <select {...form.register("destinationAccountId")}>
+          <select {...form.register("destinationAccountId")} disabled={!accounts.length}>
             <option value="">Select account</option>
             {accounts.map((account) => (
               <option key={account.id} value={account.id}>
@@ -206,12 +213,13 @@ function RecurringForm({
               </option>
             ))}
           </select>
+          {!accounts.length && <small className="field-hint field-hint--warning">You need at least two accounts before creating transfer recurrences.</small>}
         </label>
       ) : (
         <label>
           Category
-          <select {...form.register("categoryId")}>
-            <option value="">Select category</option>
+          <select {...form.register("categoryId")} disabled={!categories.filter((category) => category.type === form.watch("type")).length}>
+            <option value="">{categories.filter((category) => category.type === form.watch("type")).length ? "Select category" : "Create a matching category first"}</option>
             {categories
               .filter((category) => category.type === form.watch("type"))
               .map((category) => (
@@ -220,6 +228,9 @@ function RecurringForm({
                 </option>
               ))}
           </select>
+          {!categories.filter((category) => category.type === form.watch("type")).length && (
+            <small className="field-hint field-hint--warning">No {form.watch("type").toLowerCase()} category found. Create one in Settings first.</small>
+          )}
         </label>
       )}
       <label>

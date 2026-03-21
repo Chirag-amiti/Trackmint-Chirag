@@ -14,6 +14,23 @@ function tooltipCurrency(value: number | string | readonly (number | string)[] |
   return currency(normalized);
 }
 
+function DonutTooltip({ active, payload }: { active?: boolean; payload?: Array<{ name?: string; value?: number | string }> }) {
+  if (!active || !payload?.length) {
+    return null;
+  }
+
+  const item = payload[0];
+  const label = item.name ?? "";
+  const value = Number(item.value ?? 0);
+
+  return (
+    <div className="chart-tooltip chart-tooltip--donut">
+      <strong>{label}</strong>
+      <span>{tooltipCurrency(value)}</span>
+    </div>
+  );
+}
+
 export function DashboardPage() {
   const { data, isLoading } = useQuery({
     queryKey: ["dashboard-summary"],
@@ -30,7 +47,7 @@ export function DashboardPage() {
   ];
   const categorySpend = data?.spendingByCategory ?? [];
   const totalCategorySpend = categorySpend.reduce((sum, item) => sum + item.value, 0);
-  const topCategories = categorySpend.slice(0, 5);
+  const topCategories = categorySpend.slice(0, 6);
 
   return (
     <AppShell title="Dashboard">
@@ -68,12 +85,18 @@ export function DashboardPage() {
                 <div className="donut-panel__visual">
                   <ResponsiveContainer width="100%" height={280}>
                     <PieChart>
-                      <Pie data={categorySpend} dataKey="value" nameKey="label" innerRadius={78} outerRadius={108}>
+                      <Pie data={categorySpend} dataKey="value" nameKey="label" innerRadius={78} outerRadius={108} stroke="none">
                         {categorySpend.map((item) => (
                           <Cell key={item.label} fill={item.color} />
                         ))}
                       </Pie>
-                      <Tooltip formatter={(value) => tooltipCurrency(value)} />
+                      <Tooltip
+                        content={<DonutTooltip />}
+                        cursor={false}
+                        allowEscapeViewBox={{ x: true, y: true }}
+                        position={{ x: 252, y: 108 }}
+                        wrapperStyle={{ pointerEvents: "none", zIndex: 8 }}
+                      />
                     </PieChart>
                   </ResponsiveContainer>
                   <div className="donut-panel__center">
