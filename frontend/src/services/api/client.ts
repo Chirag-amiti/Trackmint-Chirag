@@ -2,7 +2,8 @@ import axios from "axios";
 import type { AuthResponse } from "../../types/models";
 import { getAuthSession, useAuthStore } from "../../store/auth-store";
 
-const baseURL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:5151/api";
+const configuredApiBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim();
+const baseURL = configuredApiBaseUrl && configuredApiBaseUrl.length > 0 ? configuredApiBaseUrl : "http://localhost:5151/api";
 
 export const api = axios.create({
   baseURL,
