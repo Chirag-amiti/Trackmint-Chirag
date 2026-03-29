@@ -85,7 +85,9 @@ export function ReportsPage() {
       if (params.categoryId) search.set("categoryId", params.categoryId);
       if (params.type) search.set("type", params.type);
 
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL ?? "http://localhost:5151/api"}/reports/export/csv?${search.toString()}`, {
+      const configuredApiBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim();
+      const apiBaseUrl = configuredApiBaseUrl && configuredApiBaseUrl.length > 0 ? configuredApiBaseUrl : "http://localhost:5151/api";
+      const response = await fetch(`${apiBaseUrl}/reports/export/csv?${search.toString()}`, {
         headers: {
           Authorization: `Bearer ${session?.accessToken ?? ""}`,
         },
